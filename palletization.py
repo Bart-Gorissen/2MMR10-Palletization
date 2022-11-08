@@ -37,7 +37,7 @@ from visualization import *
 DLT = 5 # reaching coefficient for pushing
 # CNT = 10 # default number of pallets
 verbose = 1 # 0 : only result, 1 : +important steps, 2 : +debug
-ITER_MAX = 10000
+ITER_MAX = 100000
 
 #######################
 # AUXILIARY FUNCTIONS #
@@ -96,9 +96,11 @@ def greedy_01(P, W, L, H):
         iter += 1
 
     if iter >= ITER_MAX:
-        print("ERROR: Maximum iterations exceeded")
+        print("ERROR: Maximum iterations exceeded {l} boxes remaining".format(l=len(queue)))
+        for p in queue:
+            print(p)
 
-    return A
+    return A, iter < ITER_MAX
 
 
 
@@ -138,7 +140,7 @@ def main():
     print("\nVerbose mode {v}\n".format(v=verbose))
 
     if mode == "greedy_01":
-            A = greedy_01(P, W, L, H)
+            A, truth = greedy_01(P, W, L, H)
     else:
         print("ERROR: mode {m} not supported".format(m=mode))
         return -1
@@ -148,6 +150,7 @@ def main():
         print(p.to_string())
 
     print("\nProperties:")
+    print("Algorithm completed: {t}".format(t=truth))
     print("Assignment fits in bounds: {t}".format(t=A.is_in_bounds()))
     print("Assignment has no overlap: {t}".format(t=not A.has_intersect()))
     # print("Assignment is eps-bottom-stable: {t}".format(t=A.is_bottom_supported()))
