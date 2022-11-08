@@ -2,4 +2,4 @@
 
 For all your palletization needs.
 
-Run with `python palletization.py [dataset]`
+Run with `python palletization.py [greedy_01 | greedy_02 | bb] [dataset]`

@@ -332,7 +332,7 @@ def main():
             mode = "greedy_02"
             continue
         elif cur == "bb":
-            mode = "greedy_01"
+            mode = "bb"
             continue
         else:
             print("ERROR: argument {a} not supported".format(a=cur))
