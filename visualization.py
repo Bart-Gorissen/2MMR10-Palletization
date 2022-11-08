@@ -13,7 +13,7 @@ def make_figure(P, points, W, L, H):
 
     scatter = go.Scatter3d(x=px, y=py, z=pz,
                  mode='markers',
-                 marker=dict(size=10)
+                 marker=dict(size=5)
                  )
 
     cubes.append(scatter)
