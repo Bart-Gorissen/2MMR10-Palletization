@@ -118,14 +118,12 @@ def main():
         cur = args[0]
         args.remove(cur)
 
-        match cur:
-            case "greedy_01":
-                mode = "greedy_01"
-                continue
-
-            case other:
-                print("ERROR: argument {a} not supported".format(a=cur))
-                return -1
+        if cur == "greedy_01":
+            mode = "greedy_01"
+            continue
+        else:
+            print("ERROR: argument {a} not supported".format(a=cur))
+            return -1
 
     path = args[0]
     P = read_instance(path)
@@ -139,12 +137,11 @@ def main():
 
     print("\nVerbose mode {v}\n".format(v=verbose))
 
-    match mode:
-        case "greedy_01":
+    if mode == "greedy_01":
             A = greedy_01(P, W, L, H)
-        case other:
-            print("ERROR: mode {m} not supported".format(m=mode))
-            return -1
+    else:
+        print("ERROR: mode {m} not supported".format(m=mode))
+        return -1
 
     print("Found ordered assignment:")
     for p in A.A:

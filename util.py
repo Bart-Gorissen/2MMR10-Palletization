@@ -17,39 +17,37 @@ def is_behind(p, q, s): # s is the face (0 and 3: x+ and x-, 1 and 4: y+ and y-,
         return p.z >= q.z # -> -
 
 def overlap(p, q, s): # here s is the orientation (mod 3)
-    match s % 3:
-        case 0: # x direction
-            if p.x + p.w <= q.x: return 0
-            if q.x + q.w <= p.x: return 0
-            aux1 = max(p.y + p.l - q.y, q.y + q.l - p.y)
-            aux2 = max(p.z + p.h - q.z, q.z + q.h - p.z)
-            return aux1 * aux2
-        case 1: # y direction
-            if p.y + p.l <= q.y: return 0
-            if q.y + q.l <= p.y: return 0
-            aux1 = max(p.x + p.w - q.x, q.x + q.w - p.x)
-            aux2 = max(p.z + p.h - q.z, q.z + q.h - p.z)
-            return aux1 * aux2
-        case 2: # z direction
-            if p.z + p.h <= q.z: return 0
-            if q.z + q.h <= p.z: return 0
-            aux1 = max(p.x + p.w - q.x, q.x + q.w - p.x)
-            aux2 = max(p.y + p.l - q.y, q.y + q.l - p.y)
-            return aux1 * aux2
+    if s % 3 == 0: # x direction
+        if p.x + p.w <= q.x: return 0
+        if q.x + q.w <= p.x: return 0
+        aux1 = max(p.y + p.l - q.y, q.y + q.l - p.y)
+        aux2 = max(p.z + p.h - q.z, q.z + q.h - p.z)
+        return aux1 * aux2
+    if s % 3 == 1: # y direction
+        if p.y + p.l <= q.y: return 0
+        if q.y + q.l <= p.y: return 0
+        aux1 = max(p.x + p.w - q.x, q.x + q.w - p.x)
+        aux2 = max(p.z + p.h - q.z, q.z + q.h - p.z)
+        return aux1 * aux2
+    if s % 3 == 2: # z direction
+        if p.z + p.h <= q.z: return 0
+        if q.z + q.h <= p.z: return 0
+        aux1 = max(p.x + p.w - q.x, q.x + q.w - p.x)
+        aux2 = max(p.y + p.l - q.y, q.y + q.l - p.y)
+        return aux1 * aux2
 
 def overlap_rect(p, q, s): # this is unguared: check if intersection area non-empty first!
-    match s % 3:
-        case 1:
+    if s % 3 == 0: # x direction
             aux1 = max(p.y, q.y)
             aux2 = min(p.y + p.l, q.y + q.l)
             aux3 = max(p.z, q.z)
             aux4 = min(p.z + p.h, q.z + q.h)
-        case 2:
+    if s % 3 == 1: # y direction
             aux1 = max(p.x, q.x)
             aux2 = min(p.x + p.w, q.x + q.w)
             aux3 = max(p.z, q.z)
             aux4 = min(p.z + p.h, q.z + q.h)
-        case 3:
+    if s % 3 == 2: # z direction
             aux1 = max(p.x, q.x)
             aux2 = min(p.x + p.w, q.x + q.w)
             aux3 = max(p.y, q.y)
