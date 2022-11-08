@@ -1,7 +1,7 @@
 import itertools
 import sys
 #import pathlib
-#import gurobipy as gp
+import gurobipy as gp
 #import itertools
 #import time
 #import numpy as np
@@ -38,7 +38,7 @@ from visualization import *
 DLT = 5 # reaching coefficient for pushing
 # CNT = 10 # default number of pallets
 verbose = 1 # 0 : only result, 1 : +important steps, 2 : +debug
-ITER_MAX = 100000
+ITER_MAX = 100
 
 #######################
 # AUXILIARY FUNCTIONS #
@@ -70,74 +70,105 @@ def read_instance(
 # OPTIMIZATION FUNCTIONS #
 ##########################
 
-def greedy_01(P, W, L, H):
+##########
+# GREEDY #
+##########
+
+def count_placement(A, open, p):
+    cnt = 0
+    A.add(p)
+    for (cur, wlh) in itertools.product(open, itertools.permutations([p.w, p.l, p.h])):
+        p.set(cur, wlh)
+        if not  A.is_in_bounds(): continue
+        if A.has_intersect(): continue
+        #if not A.is_bottom_supported(): continue
+        cnt += 1
+    A.remove(p)
+    return cnt
+
+def greedy_02(P, W, L, H):
     queue = [ ]
     Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing, sorted on volume
-    #Q = sorted(P, key=lambda p: max(p.w, p.l, p.h), reverse=True) # sorted on largest side
-    #Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=False)  # sorted on volume van klein naar groot
-    #Q = sorted(P, key=lambda p: max(p.w, p.l, p.h), reverse=False) # sorted on smallest side
-    #R = []
-    #for i in P:
-        #if i.w > L or i.l > L or i.h > L:
-            #R.append(i)
-            #P.remove(i)
-    #print(len(R), len(P))
-    #print(R)
-
-    #S = sorted(R, key=lambda p: p.w * p.l * p.h, reverse=True)
-    #Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True)  # volume decreasing, sorted on volume
-    #for p in S:
-        #queue.append(p)
     for p in Q:
         queue.append(p)
-    #Y = S+Q
-    A = Assignment(Q, W, L, H)
+    A = Assignment([ ], W, L, H)
+    open = [ (0, 0, 0) ] # points of interest
+    open_history = open
+    iter = 0
+
+    while len(queue) > 0 and iter < ITER_MAX:
+        p = queue.pop(0)
+        wlh_tuples = itertools.permutations([p.w, p.l, p.h])
+        A.add(p)
+        has_place = False
+
+        max = -1
+        best_cur, best_wlh = -1, -1
+        for (cur, wlh) in itertools.product(open, wlh_tuples):
+            p.set(cur, wlh)
+            if not A.is_in_bounds(): continue
+            if A.has_intersect(): continue
+            if not A.is_bottom_supported(): continue
+
+            pos_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
+            pos_open = open+pos_new
+            pos_open.remove(cur)
+            has_place = True
+
+            if len(queue) == 0:
+                best_cur, best_wlh = cur, wlh
+                has_place = True
+                break
+
+            q = queue[0]
+            cnt = count_placement(A, pos_open, q)
+            if cnt > max: max, best_cur, best_wlh = cnt, cur, wlh
+
+        if has_place:
+            p.set(best_cur, best_wlh)
+            open.remove(best_cur)
+            open_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
+            open_history.extend(open_new)
+            open.extend(open_new)
+        else:
+            A.remove(p)
+            queue.append(p)
+
+        iter += 1
+
+    if iter >= ITER_MAX:
+        print("ERROR: Maximum iterations exceeded {l} boxes remaining".format(l=len(queue)))
+        for p in queue:
+            print(p)
+
+    return A, iter < ITER_MAX, open_history
+
+def greedy_01(P, W, L, H):
+    Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing
+    queue = [ ]
+    for p in Q:
+        queue.append(p)
+    A = Assignment([ ], W, L, H)
     open = [ (0, 0, 0) ] # points of interest
     open_history = open
     iter = 0
     while len(queue) > 0 and iter < ITER_MAX:
         p = queue.pop(0)
-        w, l, h = p.w, p.l, p.h
-        wlh_tuples = itertools.permutations([w, l, h])
+        wlh_tuples = itertools.permutations([p.w, p.l, p.h])
         has_place = False
-        pointmax = 0
-        curi = open[0]
         for (cur, wlh) in itertools.product(open, wlh_tuples):
-            i = 0
             p.set(cur, wlh)
-            if p.x + p.w > W or p.y + p.l > L or p.z + p.h > H : continue
-            if p.has_intersect_set(Q[:iter]): continue
-            pos_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
-            pos_open = open+pos_new
-            if len(queue) > 0:
-                pnext = queue[0]
-                w1, l1, h1 = pnext.w, pnext.l, pnext.h
-                wlh1_tuples = itertools.permutations([w1, l1, h1])
-                for (cur1, wlh1) in itertools.product(pos_open, wlh1_tuples):
-                    pnext.set(cur1, wlh1)
-                    if pnext.x + pnext.w > W or pnext.y + pnext.l > L or pnext.z + pnext.h > H: continue
-                    if pnext.has_intersect_set(Q[:iter]): continue
-                    i += 1
-                if pointmax < i:
-                    pointmax = i
-                    curi = cur
-                    wlhi = wlh
-            elif len(queue) == 0:
-                #open.remove(curc)
-                #open_new = [(p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h)]
-                #open_history.extend(open_new)
-                #open.extend(open_new)
-                has_place = True
+            A.add(p)
+            if A.is_in_bounds(): A.remove(p); continue
+            if A.has_intersect(): A.remove(p); continue
+            if A.is_bottom_supported(): A.remove(p); continue
 
-
-        if has_place == False:
-            p.set(curi, wlhi)
-            open.remove(curi)
+            open.remove(cur)
             open_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
             open_history.extend(open_new)
             open.extend(open_new)
             has_place = True
-
+            break
 
         if not has_place: queue.append(p)
         iter += 1
@@ -148,6 +179,133 @@ def greedy_01(P, W, L, H):
             print(p)
 
     return A, iter < ITER_MAX, open_history
+
+##################
+# BRANCH & BOUND #
+##################
+
+def find_open(A):
+    xs, ys, zs = set([0]), set([0]), set([0])
+    for p in A.A:
+        xs.add(p.x); ys.add(p.y); zs.add(p.z)
+        xs.add(p.x+p.w); ys.add(p.y+p.l); zs.add(p.z+p.h)
+    return itertools.product(xs, ys, zs)
+
+def find_order_location(A, P):
+    res = [ ]
+    open = find_open(A)
+
+    for p in P:
+        wlh_tuples = itertools.permutations([p.w, p.l, p.h])
+        for (cur, wlh) in itertools.product(open, wlh_tuples):
+            p.set(cur, wlh)
+            A.add(p)
+            if not A.is_in_bounds(): continue
+            if not A.has_intersect(): continue
+            if not A.is_bottom_supported(): continue
+            A.remove(p)
+            value = 1 # compute in some better way
+            res.append((value, p, cur, wlh))
+
+    # return sorted based on best weights
+    return res.sorted(key=lambda x : x[0], reversed=True)
+
+def branch_and_bound(A, P, u): # current assignment A, remaining P
+    if len(P) == 0:
+        return A, True
+
+    # gets best options for next placement
+    order = find_order_location(A, P)
+
+    for (_, p, loc, wlh) in order:
+        p.set(loc, wlh)
+        A.add(p)
+        if -1 < u: # this should be a fancier function
+            A.remove(p)
+            break
+        A_res, res = branch_and_bound(A, P.remove(p), u)
+        if res : return A_res, res
+        A.remove(p)
+        P.append(p)
+
+    return -1, False
+
+def branch_and_bound_pre(P, W, L, H):
+    A = Assignment([], W, L, H)
+    res, truth = branch_and_bound(A, P, 1)
+    return res, truth, []
+
+
+
+####################
+# LEVEL GENERATION #
+####################
+
+def gen_level_height(P, W, L, H):
+    A = Assignment([], W, L, H)
+
+    Q = [ p for p in P if p.w <= H or p.l <= H or p.h <= H ]
+    VQ = [ p.w * p.l * p.h for p in Q ]
+    n = len(Q)
+
+    m = gp.Model("compact")
+
+    # bottom-left coordinates
+    x = m.addVars(range(n), vtype=gp.GRB.CONTINUOUS, lb=0, ub=W, name="x")
+    y = m.addVars(range(n), vtype=gp.GRB.CONTINUOUS, lb=0, ub=L, name="y")
+    z = m.addVars(range(n), vtype=gp.GRB.CONTINUOUS, lb=0, ub=H, name="z")
+
+    # dimensions
+    w = m.addVars(range(n), vtype=gp.GRB.CONTINUOUS, lb=0, ub=W, name="w")
+    l = m.addVars(range(n), vtype=gp.GRB.CONTINUOUS, lb=0, ub=L, name="l")
+    h = m.addVars(range(n), vtype=gp.GRB.CONTINUOUS, lb=0, ub=H, name="h")
+
+    # used
+    b = m.addVars(range(n), vtype=gp.GRB.BINARY, name="b")
+
+    # each box should keep its dimensions
+
+
+    # each box should be in the pallet
+    m.addConstrs(gp.quicksum(x[i] + w[i] <= W) for i in range(n))
+    m.addConstrs(gp.quicksum(y[i] + l[i] <= L) for i in range(n))
+    m.addConstrs(gp.quicksum(z[i] + h[i] <= H) for i in range(n))
+
+    # boxes should not intersect
+    m.addConstrOr([x1, x3, x4] )
+
+
+    # we maximize the total volume packed
+    m.setObjective(gp.quicksum(b[i] * VQ[i] for i in range(n)), sense=gp.GRB.MINIMIZE)
+
+    # require that a and b satisfy the inequalities for all x in X
+    m.addConstrs(
+        gp.quicksum(a[i, j] * X[l][j] for j in range(n)) <= b[i]
+        for i, l in itertools.product(range(K), range(len(X)))
+    )
+
+    # separation of points in Y (optional)
+    m.addConstrs(
+        gp.quicksum(a[i, j] * Y[l][j] for j in range(n)) >= b[i] + eps - ((1 - s[i, l]) * M)
+        for i, l in itertools.product(range(K), range(len(Y)))
+    )
+
+    # can only separate for active inequalities
+    m.addConstrs(
+        s[i, l] <= u[i]
+        for i, l in itertools.product(range(K), range(len(Y)))
+    )
+
+    # separate for each y in Y with at least one inequality
+    m.addConstrs(
+        gp.quicksum(s[i, l] for i in range(K)) >= 1
+        for l in range(len(Y))
+    )
+
+    m.optimize()
+
+    # min empty space
+    # s.t. all fit
 
 
 
@@ -170,6 +328,12 @@ def main():
         if cur == "greedy_01":
             mode = "greedy_01"
             continue
+        if cur == "greedy_02":
+            mode = "greedy_02"
+            continue
+        elif cur == "bb":
+            mode = "greedy_01"
+            continue
         else:
             print("ERROR: argument {a} not supported".format(a=cur))
             return -1
@@ -187,7 +351,11 @@ def main():
     print("\nVerbose mode {v}\n".format(v=verbose))
 
     if mode == "greedy_01":
-            A, truth, hist = greedy_01(P, W, L, H)
+        A, truth, hist = greedy_01(P, W, L, H)
+    elif mode == "greedy_02":
+        A, truth, hist = greedy_02(P, W, L, H)
+    elif mode == "bb":
+        A, truth, hist = branch_and_bound_pre(P, W, L, H)
     else:
         print("ERROR: mode {m} not supported".format(m=mode))
         return -1

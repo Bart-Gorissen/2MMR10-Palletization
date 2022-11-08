@@ -25,6 +25,9 @@ class Assignment:
     def add(self, p):
         self.A.append(p)
 
+    def remove(self, p):
+        self.A.remove(p)
+
     def get(self, i):
         return self.A[i]
 
