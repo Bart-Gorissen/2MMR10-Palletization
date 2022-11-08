@@ -60,4 +60,11 @@ def in_convexhull(P, p):
     lp = sc.optimize.linprog(c, A_eq=A, b_eq=b)
     return lp.success
 
+def free_space(P, W, L, a):
+    V_tot = W * L * a
+    for p in P:
+        V_tot -= p.w * p.l * p.h
+    return V_tot
 
+def free_space_top(P, W, L):
+    return free_space(P, W, L, max([p.z + p.h for p in P]))
