@@ -1,9 +1,22 @@
 import random
 import plotly.graph_objects as go
 
-def make_figure(P, W, L, H):
+def make_figure(P, points, W, L, H):
     random.seed(42) # consistent colors
     cubes = [ ]
+
+    px, py, pz = [ ], [ ], [ ]
+    for p in points:
+        px.append(p[0])
+        py.append(p[1])
+        pz.append(p[2])
+
+    scatter = go.Scatter3d(x=px, y=py, z=pz,
+                 mode='markers',
+                 marker=dict(size=10)
+                 )
+
+    cubes.append(scatter)
 
     for p in P:
         pxw = p.x + p.w

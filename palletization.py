@@ -76,6 +76,7 @@ def greedy_01(P, W, L, H):
         queue.append(p)
     A = Assignment(Q, W, L, H)
     open = [ (0, 0, 0) ] # points of interest
+    open_history = open
     iter = 0
     while len(queue) > 0 and iter < ITER_MAX:
         p = queue.pop(0)
@@ -88,7 +89,9 @@ def greedy_01(P, W, L, H):
             if p.has_intersect_set(Q[:iter]): continue
 
             open.remove(cur)
-            open.extend([ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ])
+            open_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
+            open_history.extend(open_new)
+            open.extend(open_new)
             has_place = True
             break
 
@@ -100,7 +103,7 @@ def greedy_01(P, W, L, H):
         for p in queue:
             print(p)
 
-    return A, iter < ITER_MAX
+    return A, iter < ITER_MAX, open_history
 
 
 
@@ -140,7 +143,7 @@ def main():
     print("\nVerbose mode {v}\n".format(v=verbose))
 
     if mode == "greedy_01":
-            A, truth = greedy_01(P, W, L, H)
+            A, truth, hist = greedy_01(P, W, L, H)
     else:
         print("ERROR: mode {m} not supported".format(m=mode))
         return -1
@@ -158,7 +161,7 @@ def main():
     # print("Assignment is delta-F-S-push-tolerant: {t}".format(t=A.is_F_S_push_tolerant([0,1,3,4], 1, DLT))) # force 1N
     # print("Assignment is a-acceleration-tolerant: {t}".format(t=A.is_a_acceleration_tolerant(1))) # acceleration 1m/ss
 
-    make_figure(A.A, W, L, H)
+    make_figure(A.A, hist, W, L, H)
 
 if __name__ == "__main__":
     main()
