@@ -154,14 +154,14 @@ def greedy_01(P, W, L, H):
     iter = 0
     while len(queue) > 0 and iter < ITER_MAX:
         p = queue.pop(0)
+        A.add(p)
         wlh_tuples = itertools.permutations([p.w, p.l, p.h])
         has_place = False
         for (cur, wlh) in itertools.product(open, wlh_tuples):
             p.set(cur, wlh)
-            A.add(p)
-            if A.is_in_bounds(): A.remove(p); continue
-            if A.has_intersect(): A.remove(p); continue
-            if A.is_bottom_supported(): A.remove(p); continue
+            if not A.is_in_bounds(): continue
+            if A.has_intersect(): continue
+            if not A.is_bottom_supported(): continue
 
             open.remove(cur)
             open_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
@@ -170,7 +170,7 @@ def greedy_01(P, W, L, H):
             has_place = True
             break
 
-        if not has_place: queue.append(p)
+        if not has_place: A.remove(p); queue.append(p)
         iter += 1
 
     if iter >= ITER_MAX:
