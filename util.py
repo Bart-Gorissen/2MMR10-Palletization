@@ -18,20 +18,17 @@ def is_behind(p, q, s): # s is the face (0 and 3: x+ and x-, 1 and 4: y+ and y-,
 
 def overlap(p, q, s): # here s is the orientation (mod 3)
     if s % 3 == 0: # x direction
-        if p.x + p.w <= q.x: return 0
-        if q.x + q.w <= p.x: return 0
+        if p.x + p.w <= q.x and q.x + q.w <= p.x: return 0
         aux1 = max(p.y + p.l - q.y, q.y + q.l - p.y)
         aux2 = max(p.z + p.h - q.z, q.z + q.h - p.z)
         return aux1 * aux2
     if s % 3 == 1: # y direction
-        if p.y + p.l <= q.y: return 0
-        if q.y + q.l <= p.y: return 0
+        if p.y + p.l <= q.y and q.y + q.l <= p.y: return 0
         aux1 = max(p.x + p.w - q.x, q.x + q.w - p.x)
         aux2 = max(p.z + p.h - q.z, q.z + q.h - p.z)
         return aux1 * aux2
     if s % 3 == 2: # z direction
-        if p.z + p.h <= q.z: return 0
-        if q.z + q.h <= p.z: return 0
+        if p.z + p.h <= q.z and q.z + q.h <= p.z: return 0
         aux1 = max(p.x + p.w - q.x, q.x + q.w - p.x)
         aux2 = max(p.y + p.l - q.y, q.y + q.l - p.y)
         return aux1 * aux2

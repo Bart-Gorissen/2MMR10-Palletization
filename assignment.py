@@ -11,6 +11,7 @@ g = 3.14 ** 2
 class Assignment:
     W, L, H = 0, 0, 0 # dimensions of pallet
     A = [] # assignment (set of oriented and transposed items) where w, l, h determines orientation
+    pallet = Item("pallet", W, L, 0)
     eps = EPS
 
     def __init__(self, A, W, L, H):
@@ -18,6 +19,8 @@ class Assignment:
         self.W = W
         self.L = L
         self.H = H
+        self.pallet.w = W
+        self.pallet.l = L
 
     def add(self, p):
         self.A.append(p)
@@ -53,7 +56,8 @@ class Assignment:
     def supports(self, p):
         res = []
         tot = 0
-        for q in self.A:
+
+        for q in self.A + [self.pallet]:
             if p == q: continue
             if q.z + q.h > p.z: continue  # q is above p
             if q.z + q.h + self.eps < p.z: continue # q is more than distance eps away from p

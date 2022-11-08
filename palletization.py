@@ -153,8 +153,8 @@ def main():
     print("Algorithm completed: {t}".format(t=truth))
     print("Assignment fits in bounds: {t}".format(t=A.is_in_bounds()))
     print("Assignment has no overlap: {t}".format(t=not A.has_intersect()))
-    # print("Assignment is eps-bottom-stable: {t}".format(t=A.is_bottom_supported()))
-    # print("Assignment is eps-bottom-side-stable: {t}".format(t=A.is_bottom_side_supported()))
+    print("Assignment is eps-bottom-stable: {t}".format(t=A.is_bottom_supported()))
+    print("Assignment is eps-bottom-side-stable: {t}".format(t=A.is_bottom_side_supported()))
     # print("Assignment is delta-F-S-push-tolerant: {t}".format(t=A.is_F_S_push_tolerant([0,1,3,4], 1, DLT))) # force 1N
     # print("Assignment is a-acceleration-tolerant: {t}".format(t=A.is_a_acceleration_tolerant(1))) # acceleration 1m/ss
 
