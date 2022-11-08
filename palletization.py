@@ -1,3 +1,4 @@
+import itertools
 import sys
 #import pathlib
 #import gurobipy as gp
@@ -70,10 +71,26 @@ def read_instance(
 ##########################
 
 def greedy_01(P, W, L, H):
-    Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing
     queue = [ ]
+    Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing, sorted on volume
+    #Q = sorted(P, key=lambda p: max(p.w, p.l, p.h), reverse=True) # sorted on largest side
+    #Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=False)  # sorted on volume van klein naar groot
+    #Q = sorted(P, key=lambda p: max(p.w, p.l, p.h), reverse=False) # sorted on smallest side
+    #R = []
+    #for i in P:
+        #if i.w > L or i.l > L or i.h > L:
+            #R.append(i)
+            #P.remove(i)
+    #print(len(R), len(P))
+    #print(R)
+
+    #S = sorted(R, key=lambda p: p.w * p.l * p.h, reverse=True)
+    #Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True)  # volume decreasing, sorted on volume
+    #for p in S:
+        #queue.append(p)
     for p in Q:
         queue.append(p)
+    #Y = S+Q
     A = Assignment(Q, W, L, H)
     open = [ (0, 0, 0) ] # points of interest
     open_history = open
@@ -83,17 +100,44 @@ def greedy_01(P, W, L, H):
         w, l, h = p.w, p.l, p.h
         wlh_tuples = itertools.permutations([w, l, h])
         has_place = False
+        pointmax = 0
+        curi = open[0]
         for (cur, wlh) in itertools.product(open, wlh_tuples):
+            i = 0
             p.set(cur, wlh)
             if p.x + p.w > W or p.y + p.l > L or p.z + p.h > H : continue
             if p.has_intersect_set(Q[:iter]): continue
+            pos_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
+            pos_open = open+pos_new
+            if len(queue) > 0:
+                pnext = queue[0]
+                w1, l1, h1 = pnext.w, pnext.l, pnext.h
+                wlh1_tuples = itertools.permutations([w1, l1, h1])
+                for (cur1, wlh1) in itertools.product(pos_open, wlh1_tuples):
+                    pnext.set(cur1, wlh1)
+                    if pnext.x + pnext.w > W or pnext.y + pnext.l > L or pnext.z + pnext.h > H: continue
+                    if pnext.has_intersect_set(Q[:iter]): continue
+                    i += 1
+                if pointmax < i:
+                    pointmax = i
+                    curi = cur
+                    wlhi = wlh
+            elif len(queue) == 0:
+                #open.remove(curc)
+                #open_new = [(p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h)]
+                #open_history.extend(open_new)
+                #open.extend(open_new)
+                has_place = True
 
-            open.remove(cur)
+
+        if has_place == False:
+            p.set(curi, wlhi)
+            open.remove(curi)
             open_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
             open_history.extend(open_new)
             open.extend(open_new)
             has_place = True
-            break
+
 
         if not has_place: queue.append(p)
         iter += 1
