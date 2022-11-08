@@ -31,48 +31,17 @@ from visualization import *
 # GLOBAL VARIABLES #
 ####################
 
-g = math.pi ** 2 # gravitational acceleration
-static_coefficient = 1 # coefficient of static friction
-EPS = 10 # error coefficient
+# g = math.pi ** 2 # gravitational acceleration
+# static_coefficient = 1 # coefficient of static friction
+# EPS = 10 # error coefficient
 DLT = 5 # reaching coefficient for pushing
-CNT = 10 # default number of pallets
+# CNT = 10 # default number of pallets
 verbose = 1 # 0 : only result, 1 : +important steps, 2 : +debug
-
-##########################
-# OPTIMIZATION FUNCTIONS #
-##########################
-
-def greedy_01(P, W, L, H):
-    Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing
-    A = Assignment(Q, W, L, H)
-    open = [ (0, 0, 0) ] # points of interest
-    iter = 0
-    for p in Q:
-        w, l, h = p.w, p.l, p.h
-        wlh_tuples = itertools.permutations([w, l, h])
-        for (cur, wlh) in itertools.product(open, wlh_tuples):
-            p.set(cur, wlh)
-            if p.x + p.w > W or p.y + p.l > L or p.z + p.h > H : continue
-            if p.has_intersect_set(Q[:iter]): continue
-
-            open.remove(cur)
-            open.extend([ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ])
-            break
-        iter += 1
-
-    return A
+ITER_MAX = 10000
 
 #######################
 # AUXILIARY FUNCTIONS #
 #######################
-
-
-
-
-
-##################
-# MAIN FUNCTIONS #
-##################
 
 def read_instance(
     path                # specification of the file to be read
@@ -93,6 +62,49 @@ def read_instance(
         P.append(Item(name,width,length,height))
 
     return P
+
+
+
+##########################
+# OPTIMIZATION FUNCTIONS #
+##########################
+
+def greedy_01(P, W, L, H):
+    Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing
+    queue = [ ]
+    for p in Q:
+        queue.append(p)
+    A = Assignment(Q, W, L, H)
+    open = [ (0, 0, 0) ] # points of interest
+    iter = 0
+    while len(queue) > 0 and iter < ITER_MAX:
+        p = queue.pop(0)
+        w, l, h = p.w, p.l, p.h
+        wlh_tuples = itertools.permutations([w, l, h])
+        has_place = False
+        for (cur, wlh) in itertools.product(open, wlh_tuples):
+            p.set(cur, wlh)
+            if p.x + p.w > W or p.y + p.l > L or p.z + p.h > H : continue
+            if p.has_intersect_set(Q[:iter]): continue
+
+            open.remove(cur)
+            open.extend([ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ])
+            has_place = True
+            break
+
+        if not has_place: queue.append(p)
+        iter += 1
+
+    if iter >= ITER_MAX:
+        print("ERROR: Maximum iterations exceeded")
+
+    return A
+
+
+
+##################
+# MAIN FUNCTIONS #
+##################
 
 def main():
     args = sys.argv[1:]
@@ -141,10 +153,10 @@ def main():
     print("\nProperties:")
     print("Assignment fits in bounds: {t}".format(t=A.is_in_bounds()))
     print("Assignment has no overlap: {t}".format(t=not A.has_intersect()))
-    print("Assignment is eps-bottom-stable: {t}".format(t=A.is_bottom_supported()))
-    print("Assignment is eps-bottom-side-stable: {t}".format(t=A.is_bottom_side_supported()))
-    print("Assignment is delta-F-S-push-tolerant: {t}".format(t=A.is_F_S_push_tolerant([0,1,3,4], 1, DLT))) # force 1N
-    print("Assignment is a-acceleration-tolerant: {t}".format(t=A.is_a_acceleration_tolerant(1))) # acceleration 1m/ss
+    # print("Assignment is eps-bottom-stable: {t}".format(t=A.is_bottom_supported()))
+    # print("Assignment is eps-bottom-side-stable: {t}".format(t=A.is_bottom_side_supported()))
+    # print("Assignment is delta-F-S-push-tolerant: {t}".format(t=A.is_F_S_push_tolerant([0,1,3,4], 1, DLT))) # force 1N
+    # print("Assignment is a-acceleration-tolerant: {t}".format(t=A.is_a_acceleration_tolerant(1))) # acceleration 1m/ss
 
     make_figure(A.A, W, L, H)
 

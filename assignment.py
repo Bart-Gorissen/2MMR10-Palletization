@@ -12,7 +12,6 @@ class Assignment:
     W, L, H = 0, 0, 0 # dimensions of pallet
     A = [] # assignment (set of oriented and transposed items) where w, l, h determines orientation
     eps = EPS
-    static_coefficient
 
     def __init__(self, A, W, L, H):
         self.A = A
