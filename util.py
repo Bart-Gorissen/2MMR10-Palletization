@@ -68,3 +68,10 @@ def free_space(P, W, L, a):
 
 def free_space_top(P, W, L):
     return free_space(P, W, L, max([p.z + p.h for p in P]))
+
+
+
+
+
+
+

@@ -202,3 +202,4 @@ class Assignment:
         for p in self.A:
             if not self.is_a_acceleration_tolerant_sub(p, a): return False
         return True
+

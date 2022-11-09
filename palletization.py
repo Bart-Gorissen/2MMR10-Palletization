@@ -104,6 +104,20 @@ def main():
         elif cur[:12] == "lambda A, p:":
             w_func = eval(cur)
             continue
+        elif cur == "weight_const":
+            w_func = const_1
+            continue
+        elif cur == "weight_top":
+            w_func = low_top
+            continue
+        elif cur == "weight_center":
+            w_func = far_center
+            continue
+        elif cur == "weight_center_top":
+            w_func = far_center_low_top
+            continue
+        elif cur == "custom":
+            w_func = custom
         elif cur == "no_dots":
             hist_dots = False
             continue
