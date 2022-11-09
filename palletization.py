@@ -167,8 +167,12 @@ def main():
         for p in P:
             if p not in A.A: print(p)
 
+    V_tot, V_eff, V_use = compute_space(A.A, W, L, H)
+
     print("\nProperties:")
     print("Time: {t} seconds".format(t=round(time_end-time_start,3)))
+    print("Total volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_tot, per_1=round(V_use*100/V_tot,3)))
+    print("Effective volume used {use} / {tot} ({per_1}%)".format(use=V_eff, tot=V_tot, per_1=round(V_eff*100/ V_tot, 3)))
     print("Algorithm completed: {t}".format(t=truth))
     print("Assignment fits in bounds: {t}".format(t=A.is_in_bounds()))
     print("Assignment has no overlap: {t}".format(t=not A.has_intersect()))
