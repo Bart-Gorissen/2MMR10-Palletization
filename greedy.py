@@ -65,7 +65,7 @@ def greedy_02(P, W, L, H): # counting ahead one iteration
         wlh_tuples = itertools.permutations([p.w, p.l, p.h])
         has_place = False
 
-        max = -1
+        cnt_max = -1
         best_cur, best_wlh = -1, -1
         for (cur, wlh) in itertools.product(open, wlh_tuples):
             p.set(cur, wlh)
@@ -86,7 +86,7 @@ def greedy_02(P, W, L, H): # counting ahead one iteration
             A.add(p)
             cnt = count_placement(A, pos_open, q)
             A.remove(p)
-            if cnt > max: max, best_cur, best_wlh = cnt, cur, wlh
+            if cnt > cnt_max: cnt_max, best_cur, best_wlh = cnt, cur, wlh
 
         if has_place:
             p.set(best_cur, best_wlh)
@@ -132,7 +132,7 @@ def greedy_03(P, W, L, H, w):
         wlh_tuples = itertools.permutations([p.w, p.l, p.h])
         has_place = False
 
-        max = -1
+        cnt_max = -1
         best_cur, best_wlh = -1, -1
         for (cur, wlh) in itertools.product(open, wlh_tuples):
             p.set(cur, wlh)
@@ -153,7 +153,7 @@ def greedy_03(P, W, L, H, w):
             A.add(p)
             cnt = count_placement_weighted(A, pos_open, q, w)
             A.remove(p)
-            if cnt > max: max, best_cur, best_wlh = cnt, cur, wlh
+            if cnt > cnt_max: cnt_max, best_cur, best_wlh = cnt, cur, wlh
 
         if has_place:
             p.set(best_cur, best_wlh)
