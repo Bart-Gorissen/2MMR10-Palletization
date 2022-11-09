@@ -175,14 +175,26 @@ def greedy_03(P, W, L, H, w):
 def const_1(A, p):
     return 1
 
-def low_top(A, p):
-    return A.H - (p.z + p.h)
-
 def far_center(A, p):
     return abs(A.W/2 - p.x) + abs(A.L/2 - p.y)
 
+def flat(A, p):
+    return A.H - p.h
+
+def low_top(A, p):
+    return A.H - (p.z + p.h)
+
+def far_center_flat(A, p):
+    return far_center(A, p) + flat(A, p)
+
 def far_center_low_top(A, p):
     return far_center(A, p) + low_top(A, p)
+
+def flat_low_top(A, p):
+    return flat(A, p) + low_top(A, p)
+
+def far_center_flat_low_top(A, p):
+    return far_center(A, p) + flat(A, p) + low_top(A, p)
 
 def custom(A, p):
     return 1
