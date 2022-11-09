@@ -1,5 +1,4 @@
-EPS = 10
-CNT = 2
+from conf import *
 
 class MultiAssignment:
     MA = [ ]  # assignments, each corresponding to a pallet

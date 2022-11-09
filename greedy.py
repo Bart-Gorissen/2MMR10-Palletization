@@ -1,7 +1,6 @@
+from conf import *
 from assignment import *
-from item import *
-
-ITER_MAX = 100
+# from item import *
 
 def greedy_01(P, W, L, H): # base version
     queue = [ ]

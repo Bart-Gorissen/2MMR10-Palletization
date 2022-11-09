@@ -7,9 +7,10 @@ import sys
 #import numpy as np
 #import math
 
+#from conf import *
 #from util import *
 #from item import *
-from assignment import *
+#from assignment import *
 from visualization import *
 from greedy import *
 from branchbound import *
@@ -30,18 +31,6 @@ from levels import *
 ###############################################################################################
 ### MAIN PART ###
 ###############################################################################################
-
-####################
-# GLOBAL VARIABLES #
-####################
-
-# g = math.pi ** 2 # gravitational acceleration
-# static_coefficient = 1 # coefficient of static friction
-# EPS = 10 # error coefficient
-DLT = 5 # reaching coefficient for pushing
-# CNT = 10 # default number of pallets
-verbose = 1 # 0 : only result, 1 : +important steps, 2 : +debug
-ITER_MAX = 100
 
 #######################
 # AUXILIARY FUNCTIONS #

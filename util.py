@@ -1,6 +1,8 @@
 import numpy as np
 import scipy as sc
 
+from conf import *
+
 # whether q is behind p in direction s
 def is_behind(p, q, s): # s is the face (0 and 3: x+ and x-, 1 and 4: y+ and y-, 2 and 5: z+ and z-) modulo 6
     if s == 0 % 3: # x direction
@@ -33,7 +35,7 @@ def overlap(p, q, s): # here s is the orientation (mod 3)
         aux2 = max(p.y + p.l - q.y, q.y + q.l - p.y)
         return aux1 * aux2
 
-def overlap_rect(p, q, s): # this is unguared: check if intersection area non-empty first!
+def overlap_rect(p, q, s, zeta=ZETA): # this is unguared: check if intersection area non-empty first! zeta in [0,1]
     if s % 3 == 0: # x direction
             aux1 = max(p.y, q.y)
             aux2 = min(p.y + p.l, q.y + q.l)
@@ -50,7 +52,17 @@ def overlap_rect(p, q, s): # this is unguared: check if intersection area non-em
             aux3 = max(p.y, q.y)
             aux4 = min(p.y + p.l, q.y + q.l)
 
-    return [ (aux1, aux3), (aux1, aux4), (aux2, aux3), (aux2, aux4) ]
+    # now looking at square in x,y coordinates
+    # zeta = 1 : standard
+    # zeta = 0 : single line
+    len_x_2 = (aux2 - aux1) / 2
+    len_y_2 = (aux4 - aux3) / 2
+    xlow = aux1 + ((1-zeta)* len_x_2)
+    ylow = aux3 + ((1-zeta)* len_y_2)
+    xhi = aux2 + ((zeta-1) * len_x_2)
+    yhi = aux4 + ((zeta-1) * len_y_2)
+
+    return [ (xlow, ylow), (xlow, yhi), (xhi, ylow), (xhi, yhi) ]
 
 def in_convexhull(P, p):
     # formulates containment as an LP

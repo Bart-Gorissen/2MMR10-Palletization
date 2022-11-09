@@ -1,12 +1,9 @@
 import itertools
 import queue
 
+from conf import *
 from util import *
 from item import *
-
-EPS = 10
-static_coefficient = 1
-g = 3.14 ** 2
 
 class Assignment:
     W, L, H = 0, 0, 0 # dimensions of pallet
@@ -67,6 +64,7 @@ class Assignment:
             a = overlap(p, q, 2)
             if a > 0:
                 ol_rect = overlap_rect(p, q, 2)
+
                 res.append((q, a, ol_rect))
                 tot += a
 
@@ -120,7 +118,7 @@ class Assignment:
 
         T = TB
         T.extend(TS)
-        return in_convexhull(np.array(T), (p.x, p.y))
+        return in_convexhull(np.array(T), (p.c[0], p.c[1]))
 
     def is_bottom_supported(self):
         for p in self.A:
