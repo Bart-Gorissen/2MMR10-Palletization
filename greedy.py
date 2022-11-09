@@ -185,7 +185,6 @@ def greedy_03(P, W, L, H, w, backup=False):
                 queue.append(p)
 
         iter += 1
-        print(iter, len(queue), len(backup_queue))
 
     if iter >= ITER_MAX:
         print("ERROR: Maximum iterations exceeded {l} boxes remaining".format(l=len(queue)))
