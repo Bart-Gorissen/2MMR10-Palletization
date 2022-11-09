@@ -74,6 +74,9 @@ def main():
     figure = True
     hist_dots = True
     sort_method = "volume"
+    lvl_fixed = True
+    lvl_max = "total"
+    greedy_backup = False
 
     while len(args) > 1:
         cur = args[0]
@@ -81,58 +84,50 @@ def main():
 
         if cur == "greedy_01":
             mode = "greedy_01"
-            continue
-        if cur == "greedy_02":
+        elif cur == "greedy_02":
             mode = "greedy_02"
-            continue
-        if cur == "greedy_03":
+        elif cur == "greedy_03":
             mode = "greedy_03"
-            continue
         elif cur == "bb":
             mode = "bb"
-            continue
-        elif cur == "level_01":
-            mode = "level_01"
-            continue
+        elif cur == "level_01" or cur == "level_02":
+            mode = cur
         elif cur[:5] == "sort:":
             sort_method = cur[5:]
-            continue
         elif cur[:12] == "lambda A, p:":
             w_func = eval(cur)
-            continue
         elif cur == "weight_const":
             w_func = const_1
-            continue
         elif cur == "flat":
             w_func = flat
-            continue
         elif cur == "weight_top":
             w_func = low_top
-            continue
         elif cur == "weight_center":
             w_func = far_center
-            continue
         elif cur == "weight_center_flat":
             w_func = far_center_flat
-            continue
         elif cur == "weight_center_top":
             w_func = far_center_low_top
-            continue
         elif cur == "flat_top":
             w_func = flat_low_top
-            continue
         elif cur == "weight_center_flat_top":
             w_func = far_center_flat_low_top
-            continue
         elif cur == "custom":
             w_func = custom
-            continue
+        elif cur == "total" or cur == "density":
+            lvl_max = cur
+        elif cur == "twoqueue":
+            greedy_backup = True
+        elif cur == "onequeue":
+            greedy_backup = False
+        elif cur == "fix_p":
+            lvl_fixed = True
+        elif cur == "loose_p":
+            lvl_fixed = False
         elif cur == "no_dots":
             hist_dots = False
-            continue
         elif cur == "no_vis":
             figure = False
-            continue
         else:
             print("ERROR: argument {a} not supported".format(a=cur))
             return -1
@@ -150,11 +145,11 @@ def main():
     print("\nVerbose mode {v}\n".format(v=verbose))
 
     if mode == "greedy_01" or mode == "greedy_02" or mode == "greedy_03":
-        A, truth, hist = greedy(P, W, L, H, method=sort_method, algo=mode, w=w_func)
+        A, truth, hist = greedy(P, W, L, H, method=sort_method, algo=mode, w=w_func, backup=greedy_backup)
     elif mode == "bb":
         A, truth, hist = branch_and_bound_pre(P, W, L, H)
-    elif mode == "level_01":
-        A, truth, hist = levels_01(P, W, L, H)
+    elif mode == "level_01" or mode == "level_02":
+        A, truth, hist = levels(P, W, L, H, fixed=lvl_fixed, method=mode, max=lvl_max)
     else:
         print("ERROR: mode {m} not supported".format(m=mode))
         return -1

@@ -2,15 +2,16 @@ from conf import *
 from assignment import *
 # from item import *
 
-def greedy_01(P, W, L, H): # base version
+def greedy_01(P, W, L, H, backup=False): # base version
     queue = [ ]
+    backup_queue = []
     for p in P:
         queue.append(p)
     A = Assignment([ ], W, L, H)
     open = [ (0, 0, 0) ] # points of interest
     open_history = open
     iter = 0
-    while len(queue) > 0 and iter < ITER_MAX:
+    while len(queue) > 0 and (iter < ITER_MAX or backup):
         p = queue.pop(0)
         wlh_tuples = itertools.permutations([p.w, p.l, p.h])
         has_place = False
@@ -27,8 +28,16 @@ def greedy_01(P, W, L, H): # base version
             has_place = True
             break
 
-        if has_place: A.add(p)
-        if not has_place: queue.append(p)
+        if has_place:
+            A.add(p)
+            if backup:
+                queue = backup_queue + queue
+                backup_queue = []
+        else:
+            if backup:
+                backup_queue.append(p)
+            else:
+                queue.append(p)
         iter += 1
 
     if iter >= ITER_MAX:
@@ -48,8 +57,9 @@ def count_placement(A, open, p):
         cnt += 1
     return cnt
 
-def greedy_02(P, W, L, H): # counting ahead one iteration
+def greedy_02(P, W, L, H, backup=False): # counting ahead one iteration
     queue = [ ]
+    backup_queue = []
     for p in P:
         queue.append(p)
     A = Assignment([ ], W, L, H)
@@ -57,7 +67,7 @@ def greedy_02(P, W, L, H): # counting ahead one iteration
     open_history = open
     iter = 0
 
-    while len(queue) > 0 and iter < ITER_MAX:
+    while len(queue) > 0 and (iter < ITER_MAX or backup):
         p = queue.pop(0)
         wlh_tuples = itertools.permutations([p.w, p.l, p.h])
         has_place = False
@@ -92,8 +102,14 @@ def greedy_02(P, W, L, H): # counting ahead one iteration
             open_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
             open_history.extend(open_new)
             open.extend(open_new)
+            if backup:
+                queue = backup_queue + queue
+                backup_queue = [ ]
         else:
-            queue.append(p)
+            if backup:
+                backup_queue.append(p)
+            else:
+                queue.append(p)
 
         iter += 1
 
@@ -114,8 +130,9 @@ def count_placement_weighted(A, open, p, w): # counting using weight function w
         weight += w(A,p)
     return weight
 
-def greedy_03(P, W, L, H, w):
+def greedy_03(P, W, L, H, w, backup=False):
     queue = [ ]
+    backup_queue = [ ]
     for p in P:
         queue.append(p)
     A = Assignment([ ], W, L, H)
@@ -123,7 +140,7 @@ def greedy_03(P, W, L, H, w):
     open_history = open
     iter = 0
 
-    while len(queue) > 0 and iter < ITER_MAX:
+    while len(queue) > 0 and (iter < ITER_MAX or backup):
         p = queue.pop(0)
         wlh_tuples = itertools.permutations([p.w, p.l, p.h])
         has_place = False
@@ -158,10 +175,17 @@ def greedy_03(P, W, L, H, w):
             open_new = [ (p.x + p.w, p.y, p.z), (p.x, p.y + p.l, p.z), (p.x, p.y, p.z + p.h) ]
             open_history.extend(open_new)
             open.extend(open_new)
+            if backup:
+                queue = backup_queue + queue
+                backup_queue = [ ]
         else:
-            queue.append(p)
+            if backup:
+                backup_queue.append(p)
+            else:
+                queue.append(p)
 
         iter += 1
+        print(iter, len(queue), len(backup_queue))
 
     if iter >= ITER_MAX:
         print("ERROR: Maximum iterations exceeded {l} boxes remaining".format(l=len(queue)))
@@ -202,14 +226,14 @@ def custom(A, p):
 
 # GENERAL GREEDY WRAPPER
 
-def greedy(P, W, L, H, method="volume", algo="greedy_01", w=const_1):
+def greedy(P, W, L, H, method="volume", algo="greedy_01", w=const_1, backup=False):
     Q = sort_points(P, method)
     if algo == "greedy_01":
-        return greedy_01(Q, W, L, H)
+        return greedy_01(Q, W, L, H, backup)
     if algo == "greedy_02":
-        return greedy_02(Q, W, L, H)
+        return greedy_02(Q, W, L, H, backup)
     if algo == "greedy_03":
-        return greedy_03(Q, W, L, H, w)
+        return greedy_03(Q, W, L, H, w, backup)
 
 def sort_points(P, method):
     if method == "volume":
