@@ -3,7 +3,7 @@ import sys
 #import pathlib
 #import gurobipy as gp
 #import itertools
-#import time
+import time
 #import numpy as np
 #import math
 
@@ -144,6 +144,8 @@ def main():
 
     print("\nVerbose mode {v}\n".format(v=verbose))
 
+    time_start = time.time()
+
     if mode == "greedy_01" or mode == "greedy_02" or mode == "greedy_03":
         A, truth, hist = greedy(P, W, L, H, method=sort_method, algo=mode, w=w_func, backup=greedy_backup)
     elif mode == "bb":
@@ -153,6 +155,8 @@ def main():
     else:
         print("ERROR: mode {m} not supported".format(m=mode))
         return -1
+
+    time_end = time.time()
 
     print("Found ordered assignment:")
     for p in A.A:
@@ -164,6 +168,7 @@ def main():
             if p not in A.A: print(p)
 
     print("\nProperties:")
+    print("Time: {t} seconds".format(t=round(time_end-time_start,3)))
     print("Algorithm completed: {t}".format(t=truth))
     print("Assignment fits in bounds: {t}".format(t=A.is_in_bounds()))
     print("Assignment has no overlap: {t}".format(t=not A.has_intersect()))
