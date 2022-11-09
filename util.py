@@ -5,16 +5,16 @@ from conf import *
 
 # whether q is behind p in direction s
 def is_behind(p, q, s): # s is the face (0 and 3: x+ and x-, 1 and 4: y+ and y-, 2 and 5: z+ and z-) modulo 6
-    if s == 0 % 3: # x direction
+    if s % 3 == 0: # x direction
         if not(p.y + p.l <= q.y and q.y + q.l <= p.y and p.z + p.h <= q.z and q.z + q.h <= p.z): return False
         if s == 0 : return p.x <= q.x # -> +
         return p.x >= q.x # -> -
-    if s == 1 % 3: # y direction
+    if s % 3 == 1: # y direction
         if not(p.x + p.w <= q.x and q.x + q.w <= p.x and p.z + p.h <= q.z and q.z + q.h <= p.z): return False
         if s == 1 : return p.y <= q.y # -> +
         return p.y >= q.y # -> -
-    if s == 2 % 3: # z direction
-        if not(p.x + p.w <= q.x and q.x + q.w <= p.x and p.y + p.l <= q.y and q.y + q.l <= p.y): return False
+    if s % 3 == 2: # z direction
+        if p.x + p.w <= q.x or q.x + q.w <= p.x or p.y + p.l <= q.y or q.y + q.l <= p.y: return False
         if s == 2 : return p.z <= q.z # -> +
         return p.z >= q.z # -> -
 
