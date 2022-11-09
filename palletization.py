@@ -84,6 +84,7 @@ def main():
     w_func = lambda A, p: (A.H - (p.z + p.h)) # lower top = better
     figure = True
     hist_dots = True
+    sort_method = "volume"
 
     while len(args) > 1:
         cur = args[0]
@@ -100,6 +101,12 @@ def main():
             continue
         elif cur == "bb":
             mode = "bb"
+            continue
+        elif cur == "level_01":
+            mode = "level_01"
+            continue
+        elif cur[:5] == "sort:":
+            sort_method = cur[5:]
             continue
         elif cur[:12] == "lambda A, p:":
             w_func = eval(cur)
@@ -140,14 +147,12 @@ def main():
 
     print("\nVerbose mode {v}\n".format(v=verbose))
 
-    if mode == "greedy_01":
-        A, truth, hist = greedy_01(P, W, L, H)
-    elif mode == "greedy_02":
-        A, truth, hist = greedy_02(P, W, L, H)
-    elif mode == "greedy_03":
-        A, truth, hist = greedy_03(P, W, L, H, w_func)
+    if mode == "greedy_01" or mode == "greedy_02" or mode == "greedy_03":
+        A, truth, hist = greedy(P, W, L, H, method=sort_method, algo=mode, w=w_func)
     elif mode == "bb":
         A, truth, hist = branch_and_bound_pre(P, W, L, H)
+    elif mode == "level_01":
+        A, truth, hist = levels_01(P, W, L, H)
     else:
         print("ERROR: mode {m} not supported".format(m=mode))
         return -1

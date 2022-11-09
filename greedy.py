@@ -4,9 +4,8 @@ from item import *
 ITER_MAX = 100
 
 def greedy_01(P, W, L, H): # base version
-    Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing
     queue = [ ]
-    for p in Q:
+    for p in P:
         queue.append(p)
     A = Assignment([ ], W, L, H)
     open = [ (0, 0, 0) ] # points of interest
@@ -52,8 +51,7 @@ def count_placement(A, open, p):
 
 def greedy_02(P, W, L, H): # counting ahead one iteration
     queue = [ ]
-    Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing, sorted on volume
-    for p in Q:
+    for p in P:
         queue.append(p)
     A = Assignment([ ], W, L, H)
     open = [ (0, 0, 0) ] # points of interest
@@ -119,8 +117,7 @@ def count_placement_weighted(A, open, p, w): # counting using weight function w
 
 def greedy_03(P, W, L, H, w):
     queue = [ ]
-    Q = sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing, sorted on volume
-    for p in Q:
+    for p in P:
         queue.append(p)
     A = Assignment([ ], W, L, H)
     open = [ (0, 0, 0) ] # points of interest
@@ -174,6 +171,7 @@ def greedy_03(P, W, L, H, w):
 
     return A, iter < ITER_MAX, open_history
 
+
 # WEIGHT FUNCTIONS
 def const_1(A, p):
     return 1
@@ -189,3 +187,22 @@ def far_center_low_top(A, p):
 
 def custom(A, p):
     return 1
+
+
+# GENERAL GREEDY WRAPPER
+
+def greedy(P, W, L, H, method="volume", algo="greedy_01", w=const_1):
+    Q = sort_points(P, method)
+    if algo == "greedy_01":
+        return greedy_01(Q, W, L, H)
+    if algo == "greedy_02":
+        return greedy_02(Q, W, L, H)
+    if algo == "greedy_03":
+        return greedy_03(Q, W, L, H, w)
+
+def sort_points(P, method):
+    if method == "volume":
+        return sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True)  # volume decreasing
+
+    print("ERROR: Invalid sorting method {s}".format(s=method))
+
