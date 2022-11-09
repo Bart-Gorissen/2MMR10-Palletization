@@ -82,15 +82,11 @@ def main():
         cur = args[0]
         args.remove(cur)
 
-        if cur == "greedy_01":
-            mode = "greedy_01"
-        elif cur == "greedy_02":
-            mode = "greedy_02"
-        elif cur == "greedy_03":
-            mode = "greedy_03"
+        if cur == "greedy_01" or cur == "greedy_02" or cur == "greedy_03":
+            mode = cur
         elif cur == "bb":
             mode = "bb"
-        elif cur == "level_01" or cur == "level_02":
+        elif cur == "level_01" or cur == "level_02" or cur == "level_03":
             mode = cur
         elif cur[:5] == "sort:":
             sort_method = cur[5:]
@@ -150,8 +146,8 @@ def main():
         A, truth, hist = greedy(P, W, L, H, method=sort_method, algo=mode, w=w_func, backup=greedy_backup)
     elif mode == "bb":
         A, truth, hist = branch_and_bound_pre(P, W, L, H)
-    elif mode == "level_01" or mode == "level_02":
-        A, truth, hist = levels(P, W, L, H, fixed=lvl_fixed, method=mode, max=lvl_max)
+    elif mode == "level_01" or mode == "level_02" or mode == "level_03":
+        A, truth, hist = levels(P, W, L, H, fixed=lvl_fixed, method=mode, max_obj=lvl_max, sort=sort_method)
     else:
         print("ERROR: mode {m} not supported".format(m=mode))
         return -1
@@ -172,7 +168,7 @@ def main():
     print("\nProperties:")
     print("Time: {t} seconds".format(t=round(time_end-time_start,3)))
     print("Total volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_tot, per_1=round(V_use*100/V_tot,3)))
-    print("Effective volume used {use} / {tot} ({per_1}%)".format(use=V_eff, tot=V_tot, per_1=round(V_eff*100/ V_tot, 3)))
+    print("Effective volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_eff, per_1=round(V_use*100/ V_eff, 3)))
     print("Algorithm completed: {t}".format(t=truth))
     print("Assignment fits in bounds: {t}".format(t=A.is_in_bounds()))
     print("Assignment has no overlap: {t}".format(t=not A.has_intersect()))

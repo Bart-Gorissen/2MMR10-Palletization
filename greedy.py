@@ -233,10 +233,3 @@ def greedy(P, W, L, H, method="volume", algo="greedy_01", w=const_1, backup=Fals
         return greedy_02(Q, W, L, H, backup)
     if algo == "greedy_03":
         return greedy_03(Q, W, L, H, w, backup)
-
-def sort_points(P, method):
-    if method == "volume":
-        return sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True)  # volume decreasing
-
-    print("ERROR: Invalid sorting method {s}".format(s=method))
-

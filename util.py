@@ -90,9 +90,20 @@ def free_space(P, W, L, a):
 def free_space_top(P, W, L):
     return free_space(P, W, L, max([p.z + p.h for p in P]))
 
+def get_order(P, f, reverse=True):
+    aux = [ p for p in P ]
+    aux.sort(key=f, reverse=reverse)
+    return [ aux.index(p) for p in P ]
 
 
+def sort_points(P, method):
+    if method == "volume":
+        return sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True)  # volume decreasing
+    if method == "side":
+        return sorted(P, key=lambda p: max(p.w, p.l, p.h), reverse=True) # longest side decreasing
+    if method == "sidevol":
+        aux1 = get_order(P, f=lambda p: p.w * p.l * p.h, reverse=True) # volume decreasing
+        aux2 = get_order(P, f=lambda p: max(p.w, p.l, p.h), reverse=True)  # longest side decreasing
+        return sorted(P, key=lambda p: aux1[P.index(p)] + aux2[P.index(p)], reverse=False) # combination
 
-
-
-
+    print("ERROR: Invalid sorting method {s}".format(s=method))
