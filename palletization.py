@@ -1,5 +1,6 @@
 import itertools
 import sys
+import os
 #import pathlib
 #import gurobipy as gp
 #import itertools
@@ -76,7 +77,9 @@ def main():
     sort_method = "volume"
     lvl_fixed = True
     lvl_max = "total"
+    lvl_support = False
     greedy_backup = False
+    hist_only = False
 
     while len(args) > 1:
         cur = args[0]
@@ -116,6 +119,10 @@ def main():
             greedy_backup = True
         elif cur == "onequeue":
             greedy_backup = False
+        elif cur == "support":
+            lvl_support = True
+        elif cur == "freeform":
+            lvl_support = False
         elif cur == "fix_p":
             lvl_fixed = True
         elif cur == "loose_p":
@@ -124,6 +131,8 @@ def main():
             hist_dots = False
         elif cur == "no_vis":
             figure = False
+        elif cur == "histo":
+            hist_only = True
         else:
             print("ERROR: argument {a} not supported".format(a=cur))
             return -1
@@ -132,6 +141,10 @@ def main():
     P = read_instance(path)
     W, L, H = 800, 1200, 1500
     A = [ ]
+
+    if hist_only:
+        make_histo(P, os.path.basename(path).split('/')[-1])
+        return 1
 
     if verbose >= 1:
         print("Running on items:")
@@ -147,7 +160,7 @@ def main():
     elif mode == "bb":
         A, truth, hist = branch_and_bound_pre(P, W, L, H)
     elif mode == "level_01" or mode == "level_02" or mode == "level_03":
-        A, truth, hist = levels(P, W, L, H, fixed=lvl_fixed, method=mode, max_obj=lvl_max, sort=sort_method)
+        A, truth, hist = levels(P, W, L, H, fixed=lvl_fixed, method=mode, max_obj=lvl_max, sort=sort_method, support=lvl_support)
     else:
         print("ERROR: mode {m} not supported".format(m=mode))
         return -1
@@ -180,6 +193,7 @@ def main():
     if figure:
         if hist_dots: make_figure(A.A, hist, W, L, H)
         else: make_figure(A.A, [], W, L, H)
+
 
 if __name__ == "__main__":
     main()

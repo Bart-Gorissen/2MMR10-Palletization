@@ -1,5 +1,7 @@
 import random
 import plotly.graph_objects as go
+from matplotlib import pyplot as plt
+import numpy as np
 
 def make_figure(P, points, W, L, H):
     random.seed(42) # consistent colors
@@ -46,3 +48,18 @@ def make_figure(P, points, W, L, H):
         )
     )
     fig.show()
+
+def make_histo(P, name):
+    VP = [ p.w * p.l * p.h for p in P ]
+    SP = [ max(p.w, p.l, p.h) for p in P ]
+
+    # Creating histogram
+    fig, ax = plt.subplots()
+    ax.hist(np.array(VP), bins=len(P))
+    plt.savefig("out/volume_" + name + ".pdf")
+    fig.clear()
+
+    fig, ax = plt.subplots()
+    ax.hist(np.array(SP), bins=len(P))
+    plt.savefig("out/sidelength_" + name + ".pdf")
+    fig.clear()

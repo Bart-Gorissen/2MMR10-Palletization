@@ -97,6 +97,8 @@ def get_order(P, f, reverse=True):
 
 
 def sort_points(P, method):
+    if method == "none":
+        return P
     if method == "volume":
         return sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True)  # volume decreasing
     if method == "side":
