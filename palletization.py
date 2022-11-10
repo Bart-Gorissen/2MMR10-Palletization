@@ -54,6 +54,10 @@ def read_instance(
         length = int(line[2])
         height = int(line[3])
         P.append(Item(name,width,length,height))
+        if len(line) > 4:
+            P[-1].x = int(line[4])
+            P[-1].y = int(line[5])
+            P[-1].z = int(line[6])
 
     return P
 
@@ -80,6 +84,7 @@ def main():
     lvl_support = False
     greedy_backup = False
     hist_only = False
+    validate = False
 
     while len(args) > 1:
         cur = args[0]
@@ -133,6 +138,8 @@ def main():
             figure = False
         elif cur == "histo":
             hist_only = True
+        elif cur == "validate":
+            validate = True
         else:
             print("ERROR: argument {a} not supported".format(a=cur))
             return -1
@@ -155,15 +162,18 @@ def main():
 
     time_start = time.time()
 
-    if mode == "greedy_01" or mode == "greedy_02" or mode == "greedy_03":
-        A, truth, hist = greedy(P, W, L, H, method=sort_method, algo=mode, w=w_func, backup=greedy_backup)
-    elif mode == "bb":
-        A, truth, hist = branch_and_bound_pre(P, W, L, H)
-    elif mode == "level_01" or mode == "level_02" or mode == "level_03":
-        A, truth, hist = levels(P, W, L, H, fixed=lvl_fixed, method=mode, max_obj=lvl_max, sort=sort_method, support=lvl_support)
+    if not validate:
+        if mode == "greedy_01" or mode == "greedy_02" or mode == "greedy_03":
+            A, truth, hist = greedy(P, W, L, H, method=sort_method, algo=mode, w=w_func, backup=greedy_backup)
+        elif mode == "bb":
+            A, truth, hist = branch_and_bound_pre(P, W, L, H)
+        elif mode == "level_01" or mode == "level_02" or mode == "level_03":
+            A, truth, hist = levels(P, W, L, H, fixed=lvl_fixed, method=mode, max_obj=lvl_max, sort=sort_method, support=lvl_support)
+        else:
+            print("ERROR: mode {m} not supported".format(m=mode))
+            return -1
     else:
-        print("ERROR: mode {m} not supported".format(m=mode))
-        return -1
+        A, truth, hist = Assignment(P, W, L, H), True, [ ]
 
     time_end = time.time()
 
@@ -177,11 +187,14 @@ def main():
             if p not in A.A: print(p)
 
     V_tot, V_eff, V_use = compute_space(A.A, W, L, H)
+    V_item_total = 0
+    for p in P: V_item_total += p.w * p.l * p.h
 
     print("\nProperties:")
     print("Time: {t} seconds".format(t=round(time_end-time_start,3)))
     print("Total volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_tot, per_1=round(V_use*100/V_tot,3)))
     print("Effective volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_eff, per_1=round(V_use*100/ V_eff, 3)))
+    print("Item volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_item_total, per_1=round(V_use * 100 / V_item_total, 3)))
     print("Algorithm completed: {t}".format(t=truth))
     print("Assignment fits in bounds: {t}".format(t=A.is_in_bounds()))
     print("Assignment has no overlap: {t}".format(t=not A.has_intersect()))

@@ -78,7 +78,7 @@ def compute_space(P, W, L, H):
     V_use = 0
     top_max = P[0].z + P[0].h
     for p in P:
-        top_max = max(top_max,  p.z + p.h)
+        top_max = max(top_max, p.z + p.h)
         V_use += p.w * p.l * p.h
 
     return W*L*H, W*L*top_max, V_use
