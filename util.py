@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import scipy as sc
 
@@ -98,6 +100,9 @@ def get_order(P, f, reverse=True):
 
 def sort_points(P, method):
     if method == "none":
+        return P
+    if method == "rand":
+        random.shuffle(P)
         return P
     if method == "volume":
         return sorted(P, key=lambda p: p.w * p.l * p.h, reverse=True)  # volume decreasing
