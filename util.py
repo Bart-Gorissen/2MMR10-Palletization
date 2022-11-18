@@ -68,6 +68,7 @@ def overlap_rect(p, q, s, zeta=ZETA): # this is unguared: check if intersection 
 
 def in_convexhull(P, p):
     # formulates containment as an LP
+    if len(P) < 1: return False
     c = np.zeros(len(P))
     A = np.r_[P.T, np.ones((1, len(P)))]
     b = np.r_[(p[0], p[1]), np.ones(1)]

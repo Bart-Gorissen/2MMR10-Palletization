@@ -179,13 +179,16 @@ def run_model(P, W, L, H, p=-1, max_obj="total", fix_to_p=False, support=False):
             P[i].set((round(x[i].X), round(y[i].X), round(z[i].X)), (round(w[i].X), round(l[i].X), round(h[i].X)))
             A.add(P[i])
 
-    post_collapse_gen(A, 5)
+    # post_collapse_gen(A, 5)
     # post_collapse_gen(A, 3)
     # post_collapse_gen(A, 4)
     valid = A.is_in_bounds() and (not A.has_intersect()) and A.is_bottom_supported()
 
     if max_obj == "total": res = m.objVal
-    elif max_obj == "density": res = m.objVal / (W * L * H)
+    elif max_obj == "density":
+        h = max([ p.z + p.h for p in A.A ])
+        if h == 0 : h = H
+        res = m.objVal / (W * L * h)
 
     return A, valid, res
 
@@ -237,10 +240,10 @@ def get_best_level_02(P, W, L, fixed=True, max_obj="total", support=False): # fi
 # support : forces strong eps-bottom-support (for the layer)
 def get_best_level_03(P, W, L, fixed=True, max_obj="total", sort="volume", support=False): # fixes highest volume box, fixed controls whether p determines height level
     p = sort_points(P, method=sort)[0]
-    if len(P) > 10:
-        h = max(p.w, p.l, p.h)
-    else:
-        h = max([ max(p.w, p.l, p.h) for p in P ])
+    # if len(P) > 10:
+    h = max(p.w, p.l, p.h)
+    # else:
+    #     h = max([ max(p.w, p.l, p.h) for p in P ])
     A, valid, obj = run_model(P, W, L, h, p=p, max_obj=max_obj, fix_to_p=fixed, support=support)
 
     if not valid: print("ERROR: Generated invalid layer with expected feasible solution")
@@ -273,16 +276,17 @@ def levels(P, W, L, H, fixed=True, method="level_01", max_obj="total", sort="vol
         elif method == "level_02": A, _, obj = run_model(queue, W, L, h, p=p, max_obj=max_obj, support=support)
 
         # raise layer to correct height and add layer to assignment, remove from remaining
-        if verbose >= 2: print("Found layer:")
+        if verbose >= 2: print("Found layer with objective {v}:".format(v=obj))
+        h = max([ p.z + p.h for p in A.A ])
         for q in A.A:
-            if verbose >= 2: print(q)
+            if verbose >= 3: print(q)
             q.z += cur_height
             A_full.add(q)
             queue.remove(q)
         cur_height += h
 
-    #post_collapse_gen(A_full, 3)
-    post_collapse_gen(A_full, 5)
-    #post_collapse_gen(A_full, 4)
+    # post_collapse_gen(A_full, 3)
+    # post_collapse_gen(A_full, 4)
+    # post_collapse_gen(A_full, 5)
 
     return A_full, True, []
