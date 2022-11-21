@@ -193,7 +193,8 @@ def main():
     print("\nProperties:")
     print("Time: {t} seconds".format(t=round(time_end-time_start,3)))
     print("Total volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_tot, per_1=round(V_use*100/V_tot,3)))
-    print("Effective volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_eff, per_1=round(V_use*100/ V_eff, 3)))
+    if V_eff > 0: print("Effective volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_eff, per_1=round(V_use*100/ V_eff, 3)))
+    if V_eff == 0: print("Effective volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_eff, per_1=100))
     print("Item volume used {use} / {tot} ({per_1}%)".format(use=V_use, tot=V_item_total, per_1=round(V_use * 100 / V_item_total, 3)))
     print("Algorithm completed: {t}".format(t=truth))
     print("Assignment fits in bounds: {t}".format(t=A.is_in_bounds()))
@@ -206,7 +207,6 @@ def main():
     if figure:
         if hist_dots: make_figure(A.A, hist, W, L, H)
         else: make_figure(A.A, [], W, L, H)
-
 
 if __name__ == "__main__":
     main()
