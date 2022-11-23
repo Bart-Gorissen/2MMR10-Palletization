@@ -17,7 +17,7 @@ Greedy `options`:
 - `twoqueue`: when the greedy algorithm fails to place a box, it will be tried after the first successful placement of another box (kept in separate queue).
 - `weight_const`, `flat`, `weight_top`, `weight_center`, `weight_center_flat`, `weight_center_top`, `flat_top`, `weight_center_flat_top`: specifies the weight / utility functions used in `greedy_03`. Constant corresponds to `greedy_02`, flat values low height on boxes, weight top values low top height, weight center values boxes far from center. The others correspond to linear combinations of these (each component with weight 1).
 
-Layers `options`:
+Layers `options` (only implemented in `Layers` branch):
 - `level_01`, `level_02`, `level_03`: specifies to use layer approach. First tries all side-lengths as layer height, second does the same but allows for fixing an item in the layer, third constructs layer for a fixed item chosen by sorting the items by some metric (default decreasing volume).
 - `total`, `density`: whether the layers approach should optimize a layer for total volume in the layer, or for density of the layer (default total).
 - `support`: the layers approach enforces strong stability.
